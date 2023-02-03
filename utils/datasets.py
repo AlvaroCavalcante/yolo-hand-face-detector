@@ -362,7 +362,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
         self.mosaic_border = [-img_size // 2, -img_size // 2]
         self.stride = stride
         self.path = path        
-        #self.albumentations = Albumentations() if augment else None
+        self.albumentations = Albumentations() if augment else None
 
         try:
             f = []  # image files
@@ -1222,14 +1222,13 @@ class Albumentations:
         import albumentations as A
 
         self.transform = A.Compose([
-            A.CLAHE(p=0.01),
-            A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.01),
-            A.RandomGamma(gamma_limit=[80, 120], p=0.01),
-            A.Blur(p=0.01),
-            A.MedianBlur(p=0.01),
-            A.ToGray(p=0.01),
-            A.ImageCompression(quality_lower=75, p=0.01),],
-            bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
+            A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.25, p=0.5),
+            A.HueSaturationValue(p=0.3, hue_shift_limit=15),
+            A.RandomGamma(gamma_limit=[80, 120], p=0.2),
+            A.CoarseDropout(p=0.2, max_height=18, max_width=18),
+            A.RandomResizedCrop(512, 512, scale=(0.3, 1.2), p=0.4),
+            A.ToGray(p=0.3),],
+            bbox_params=A.BboxParams(format='yolo', label_fields=['class_labels']))
 
             #logging.info(colorstr('albumentations: ') + ', '.join(f'{x}' for x in self.transform.transforms if x.p))
 
