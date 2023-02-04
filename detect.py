@@ -6,6 +6,7 @@ import cv2
 import torch
 import torch.backends.cudnn as cudnn
 from numpy import random
+import numpy as np
 
 from models.experimental import attempt_load
 from utils.datasets import LoadStreams, LoadImages
@@ -66,6 +67,7 @@ def detect(save_img=False):
     old_img_w = old_img_h = imgsz
     old_img_b = 1
 
+    inference_speed = []
     t0 = time.time()
     for path, img, im0s, vid_cap in dataset:
         img = torch.from_numpy(img).to(device)
@@ -83,14 +85,15 @@ def detect(save_img=False):
                 model(img, augment=opt.augment)[0]
 
         # Inference
-        t1 = time_synchronized()
+        t1 = time.time() # time_synchronized()
         with torch.no_grad():   # Calculating gradients would cause a GPU memory leak
             pred = model(img, augment=opt.augment)[0]
-        t2 = time_synchronized()
+        t2 = time.time() # time_synchronized()
 
         # Apply NMS
         pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, classes=opt.classes, agnostic=opt.agnostic_nms)
-        t3 = time_synchronized()
+        t3 = time.time() # time_synchronized()
+        inference_speed.append(t2 - t1)
 
         # Apply Classifier
         if classify:
@@ -129,7 +132,15 @@ def detect(save_img=False):
                         plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=1)
 
             # Print time (inference + NMS)
-            print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
+            # print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
+
+            if (time.time() - t0) > 1:
+                mean_inf_speed_ms = 1E3 * np.mean(inference_speed)
+                print('inference ms: {}'.format(round(mean_inf_speed_ms, 2)))
+                print('inference FPS: {}'.format(
+                    round(1000 / mean_inf_speed_ms, 2)))
+
+                t0 = time.time()
 
             # Stream results
             if view_img:
@@ -140,7 +151,7 @@ def detect(save_img=False):
             if save_img:
                 if dataset.mode == 'image':
                     cv2.imwrite(save_path, im0)
-                    print(f" The image with the result is saved in: {save_path}")
+                    # print(f" The image with the result is saved in: {save_path}")
                 else:  # 'video' or 'stream'
                     if vid_path != save_path:  # new video
                         vid_path = save_path
