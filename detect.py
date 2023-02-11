@@ -136,9 +136,9 @@ def detect(save_img=False):
 
             if (time.time() - t0) > 1:
                 mean_inf_speed_ms = 1E3 * np.mean(inference_speed)
-                print('inference ms: {}'.format(round(mean_inf_speed_ms, 2)))
+                print('inference ms: {}'.format(round(mean_inf_speed_ms, 4)))
                 print('inference FPS: {}'.format(
-                    round(1000 / mean_inf_speed_ms, 2)))
+                    round(1000 / mean_inf_speed_ms, 4)))
 
                 t0 = time.time()
 
@@ -176,12 +176,12 @@ def detect(save_img=False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', nargs='+', type=str, default='yolov7.pt', help='model.pt path(s)')
-    parser.add_argument('--source', type=str, default='inference/images', help='source')  # file/folder, 0 for webcam
-    parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
+    parser.add_argument('--weights', nargs='+', type=str, default='/home/alvaro/Desktop/yolov7/runs/train/yolo-tiny-final2/weights/best.pt', help='model.pt path(s)')
+    parser.add_argument('--source', type=str, default='/home/alvaro/Downloads/yolo-tiny/images/validation/', help='source')  # file/folder, 0 for webcam
+    parser.add_argument('--img-size', type=int, default=512, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.25, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='IOU threshold for NMS')
-    parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
+    parser.add_argument('--device', default='0', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--view-img', action='store_true', help='display results')
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
     parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
